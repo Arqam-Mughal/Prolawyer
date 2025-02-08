@@ -33,7 +33,7 @@ Route::any('/payment/payu/failure', [PayuPaymentController::class, 'failure'])->
 // CashfreePayment Gateway
 // Route::get('cashfree/payments/create', [CashfreePaymentController::class, 'create'])->name('callback');
 Route::post('cashfree/payments/store', [CashfreePaymentController::class, 'store'])->name('cashfree.pay.store');
-Route::any('cashfree/payments/success', [CashfreePaymentController::class, 'successs'])->name('success');
+Route::get('cashfree/payments/success', [CashfreePaymentController::class, 'successs'])->name('success');
 
 Route::post('version-change',function(){
     $setting_exist = Setting::where('name','version-change')->first();

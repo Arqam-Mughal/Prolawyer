@@ -2661,7 +2661,7 @@ function generatePayUOrder(items) {
 
 // Function to initiate PayU payment
 function startPayUPayment(orderData) {
-    console.log(orderData);
+    // console.log(orderData);
 
     var form = $('<form action="https://test.payu.in/_payment" method="POST">');
     $.each(orderData, function(key, value) {

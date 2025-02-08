@@ -20,6 +20,7 @@
         @endif
         <a href="{{ backpack_url('logout') }}" class="dropdown-item"><i class="la la-lock me-2"></i>{{ trans('backpack::base.logout') }}</a>
 
+        @if(backpack_user()->hasRole('Super admin'))
         <div class="dropdown-divider"></div>
         <div class="dropdown-item form-check form-switch d-flex">
             @php
@@ -28,6 +29,8 @@
             <p style="margin-right: 50px">New Version</p>
             <input class="form-check-input mb-3" id="version-switch" type="checkbox" role="switch" {{ isset($version_switch) && $version_switch->value==1 ? 'checked' : '' }}>
         </div>
+
+        @endif
 
     </div>
 </div>

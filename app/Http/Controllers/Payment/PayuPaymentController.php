@@ -7,17 +7,19 @@ use App\Models\Transaction;
 use Illuminate\Http\Request;
 use Spatie\Permission\Models\Role;
 use App\Http\Controllers\Controller;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Session;
 
 class PayuPaymentController extends Controller
 {
+
     public function store(Request $request)
 {
     // Replace the items coming from Cashfree with PayU equivalent
     $raw = str_replace('amp;', '', $request->items);
     parse_str($raw, $data);
 
-    Session::put('user_register_data', $data);
+    Cache::put('user_register_data', $data);
 
     $payu_merchant_id = '3GFWvb';
     $payu_salt = 'LexCKtuurraR7yFkdIC45kGzMRdEyLK7';
@@ -38,6 +40,8 @@ class PayuPaymentController extends Controller
     } elseif ($data['plan_duration'] == 3) {
         $price = $plan->yearly_price;
     }
+    $customToken = 'payu_custom_token'.bin2hex(random_bytes(32));  // Generate a random token
+    Cache::put($customToken, $data);
 
     $order_data = [
         'txnid' => 'txn_' . rand(1111111111, 9999999999),
@@ -46,8 +50,10 @@ class PayuPaymentController extends Controller
         'email' => $data['email'],
         'phone' => $data['phone'],
         'productinfo' => 'User Registration Fee',
-         'surl' => env('APP_URL').'/payment/payu/success',
-        'furl' => env('APP_URL').'/payment/payu/failure',
+        //  'surl' => env('APP_URL').'/payment/payu/success',
+        // 'furl' => env('APP_URL').'/payment/payu/failure',
+        'surl' => env('APP_URL').'/payment/payu/success?tokenCustom='.$customToken,
+        'furl' => env('APP_URL').'/payment/payu/failure?tokenCustom='.$customToken,
         'service_provider' => 'payu_paisa',
         'key' => $payu_key,
         'merchant_id' => $payu_merchant_id,
@@ -75,24 +81,11 @@ class PayuPaymentController extends Controller
 
 public function successs(Request $request)
 {
-    $payu_merchant_id = '3GFWvb';  // Replace with your actual PayU Merchant ID
-    $payu_salt = 'LexCKtuurraR7yFkdIC45kGzMRdEyLK7';  // Replace with your actual PayU Salt
-    $payu_key = '3GFWvb';
-
-    // $payu_merchant_id = 'e5YhzV';  // Replace with your actual PayU Merchant ID
-    // $payu_salt = 'VOA4MFu7E2V6Tf5zuokESFWXS5Bbr2VP';  // Replace with your actual PayU Salt
-    // $payu_key = 'e5YhzV';
-
     $response = $request->all();
 
-    $calculated_hash = $this->generatePayUHash($response, $payu_salt);
-
-    if ($calculated_hash == $response['hash']) {
-
         if ($response['status'] == 'success') {
-            if (Session::has('user_register_data')) {
-                $data = Session::get('user_register_data');
-
+            if (Cache::has($request->tokenCustom)) {
+                $data = Cache::get($request->tokenCustom);
                 $role = explode('-', $data['role_id']);
                 $role_id = $role[0];
                 $price = 0;
@@ -138,7 +131,7 @@ public function successs(Request $request)
                 $transaction->plan_validity = $validity;
                 $transaction->save();
 
-                Session::forget('user_register_data');
+                Cache::forget($request->tokenCustom);
                 Session::flash('success', 'User Registered Successfully!');
 
                 return redirect()->route('backpack.auth.login');
@@ -146,9 +139,7 @@ public function successs(Request $request)
         } else {
             return response()->json(['error' => 'Payment not completed successfully'], 400);
         }
-    } else {
-        return response()->json(['error' => 'Hash mismatch or invalid response'], 400);
-    }
+
 }
 
 // Failure handler after PayU payment

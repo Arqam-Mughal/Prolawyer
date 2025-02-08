@@ -7,5 +7,11 @@ namespace Illuminate\Foundation\Http\Middleware;
  */
 class ValidateCsrfToken extends VerifyCsrfToken
 {
-    //
+    // app/Http/Middleware/VerifyCsrfToken.php
+
+protected $except = [
+    'payment/payu/success',
+    'payment/payu/failure',
+];
+
 }
