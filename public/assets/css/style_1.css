@@ -1,0 +1,12 @@
+[bp-section="crud-field"].active {
+    background: #eee;
+    padding: 7px 10px;
+}
+
+.datepicker-input-custom {
+    padding: 9px 5px;
+}
+
+[bp-field-type="date_picker"] .input-group-append .input-group-text, [bp-field-type="date_range"] .input-group-append .input-group-text {
+    padding: 12px .75rem;
+}

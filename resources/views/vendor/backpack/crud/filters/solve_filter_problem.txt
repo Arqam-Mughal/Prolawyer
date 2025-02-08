@@ -1,0 +1,13 @@
+##Solve Filter Problem
+
+Step 1: Comment line 28
+\vendor\backpack\crud\src\app\Library\CrudPanel\CrudFilter.php
+
+if (! backpack_pro()) {
+    throw new BackpackProRequiredException('Filter');
+}
+
+Step 2:
+make sure filters folder exist. If no exist copy from laravel backpack 4.1
+resources/views/vendor/backpack/crud/filters
+

@@ -1,0 +1,260 @@
+
+
+Subject: [PATCH] advocate and petioner update part
+advocate and petioner name in array
+---
+Index: laravel/app/Http/Controllers/CaseController.php
+IDEA additional info:
+Subsystem: com.intellij.openapi.diff.impl.patch.CharsetEP
+<+>UTF-8
+===================================================================
+diff --git a/laravel/app/Http/Controllers/CaseController.php b/laravel/app/Http/Controllers/CaseController.php
+--- a/laravel/app/Http/Controllers/CaseController.php	(revision 06f6be7692b8daec147408970f6c8cc7565cf215)
++++ b/laravel/app/Http/Controllers/CaseController.php	(revision 659892e29cdb0adb8d4897d67cd875978e8457ec)
+@@ -766,9 +766,9 @@
+             }
+
+             return response()->json(['error' => 0, 'message' => 'Data has been updated.']);
+-        } else {
+-            return response()->json(['error' => 1, 'message' => 'Could not find case.'], 404);
+-        }
++        }
++
++        return response()->json(['error' => 1, 'message' => 'Could not find case.'], 404);
+     }
+
+
+@@ -794,7 +794,6 @@
+         ];
+
+
+-
+         $hearing_date = null;
+         $filling_date = null;
+
+@@ -847,7 +846,6 @@
+         $model->tabs        = $request->tabs;
+         $model->court_bench = isset($request->court_bench) ? $request->court_bench : '---';
+         $model->case_year   = isset($request->case_year) ? $request->case_year : '---';
+-
+         $model->case_category    = isset($request->case_category) ? $request->case_category : '---';
+         $model->case_no          = isset($request->case_no) ? $request->case_no : '---';
+         $model->organization_id = $request->organization_id;
+@@ -875,53 +873,64 @@
+             'used_cases' => (auth()->user()->used_cases + 1)
+         ]);
+
++        if ($request->petitioner && count($request->petitioner) > 0) {
++            foreach ($request->petitioner as $p) {
++                if (!empty($p['petitioner_name'])) {
++                    try {
++                        // Store the petitioner name
++                        $petitioner = Petitioner::create([
++                            'case_id' => $model->id,
++                            'petitioner' => $p['petitioner_name']
++                        ]);
+
+-        if ($request->petitioner) {
++                        // Check if there's a corresponding advocate to store
++                        if (!empty($p['petitioner_advocate'])) {
++                            PetitionerAdvocate::create([
++                                'case_id' => $model->id,
++                                'petitioner_advocate' => $p['petitioner_advocate'],
+
+-            foreach ($request->petitioner as $key => $p) {
+-                if ($p != null) {
+-                    Petitioner::create(['case_id' => $model->id, 'petitioner' => $p]);
++                            ]);
++                        }
++                    } catch (\Exception $e) {
++                        // Log the error message
++                        \Log::error('Failed to insert petitioner: ' . $e->getMessage());
++                        // Optionally, you can return a response or set an error flag
++                    }
+                 } else {
+-                    if ($key == 0) {
+-                        Petitioner::create(['case_id' => $model->id, 'petitioner' => '---']);
+-                    }
++                    // Handle case where no petitioner_name is provided
++                    // You can choose to log a message or store a default value here if needed
+                 }
+             }
+         }
+-        if ($request->petitioner_advocate and count($request->petitioner_advocate) > 0) {
+-            foreach ($request->petitioner_advocate as $p) {
+-                if ($p != null) {
+-                    PetitionerAdvocate::create(['case_id' => $model->id, 'petitioner_advocate' => $p]);
+-                } else {
+-                    if ($key == 0) {
+-                        PetitionerAdvocate::create(['case_id' => $model->id, 'petitioner_advocate' => '---']);
+-                    }
+-                }
+-            }
+-        }
+-        if ($request->respondent and count($request->respondent) > 0) {
++
++        if ($request->respondent && count($request->respondent) > 0) {
+             foreach ($request->respondent as $r) {
+-                if ($r != null) {
+-                    Respondent::create(['case_id' => $model->id, 'respondent' => $r]);
+-                } else {
+-                    if ($key == 0) {
+-                        Respondent::create(['case_id' => $model->id, 'respondent' => '---']);
+-                    }
+-                }
+-            }
+-        }
+-        if ($request->respondent_advocate and count($request->respondent_advocate) > 0) {
+-            foreach ($request->respondent_advocate as $r) {
+-                if ($r != null) {
+-                    RespondentAdvocate::create(['case_id' => $model->id, 'respondent_advocate' => $r]);
++                if (!empty($r['respondent_name'])) {
++                    try {
++                        // Store the respondent name
++                        $respondent = Respondent::create([
++                            'case_id' => $model->id,
++                            'respondent' => $r['respondent_name']
++                        ]);
++
++                        // Check if there's a corresponding advocate to store
++                        if (!empty($r['respondent_advocate'])) {
++                            RespondentAdvocate::create([
++                                'case_id' => $model->id,
++                                'respondent_advocate' => $r['respondent_advocate'],
++                            ]);
++                        }
++                    } catch (\Exception $e) {
++                        // Log the error message
++                        \Log::error('Failed to insert respondent: ' . $e->getMessage());
++                        // Optionally, you can return a response or set an error flag
++                    }
+                 } else {
+-                    if ($key == 0) {
+-                        RespondentAdvocate::create(['case_id' => $model->id, 'respondent_advocate' => '---']);
+-                    }
++                    // Handle case where no respondent_name is provided
++                    // You can choose to log a message or store a default value here if needed
+                 }
+             }
+         }
+-
+
+         if (!$request->file_no) {
+             $file_no        = str_pad($model->id, 4, '0', STR_PAD_LEFT);
+@@ -1079,10 +1088,11 @@
+         $case->case_year         = isset($request->case_year) ? $request->case_year : '---';
+         $case->case_category     = isset($request->case_category) ? $request->case_category : '---';
+         $case->case_no           = isset($request->case_no) ? $request->case_no : '---';
+-        $model->organization_id = $request->organization_id;
+-        $model->client_id = $request->client_id;
+-        $model->assigned_to = $request->assigned_to;
+-        $model->tags = $request->tags ?? 0;
++        $case->organization_id   = $request->organization_id;
++        $case->client_id         = $request->client_id;
++        $case->assigned_to       = $request->assigned_to;
++        $case->tags              = $request->tags ?? 0;
++
+         $case->decided_toggle    = $request->decided_toggle;
+         $case->abbondend_toggle  = $request->abbondend_toggle;
+
+@@ -1103,53 +1113,61 @@
+         ]);
+
+         Petitioner::where('case_id', $case->id)->delete();
+-        if ($request->petitioner) {
+-            foreach ($request->petitioner as $key => $p) {
+-                if ($p != null) {
+-                    Petitioner::create(['case_id' => $case->id, 'petitioner' => $p]);
++        if ($request->petitioner && count($request->petitioner) > 0) {
++            foreach ($request->petitioner as $p) {
++                if (!empty($p['petitioner_name'])) {
++                    try {
++                        // Store the petitioner name
++                        $petitioner = Petitioner::create([
++                            'case_id' => $model->id,
++                            'petitioner' => $p['petitioner_name']
++                        ]);
++
++                        // Check if there's a corresponding advocate to store
++                        if (!empty($p['petitioner_advocate'])) {
++                            PetitionerAdvocate::create([
++                                'case_id' => $model->id,
++                                'petitioner_advocate' => $p['petitioner_advocate'],
++
++                            ]);
++                        }
++                    } catch (\Exception $e) {
++                        // Log the error message
++                        \Log::error('Failed to insert petitioner: ' . $e->getMessage());
++                        // Optionally, you can return a response or set an error flag
++                    }
+                 } else {
+-                    if ($key == 0) {
+-                        Petitioner::create(['case_id' => $case->id, 'petitioner' => '---']);
+-                    }
+-                }
+-            }
+-        }
+-
+-        PetitionerAdvocate::where('case_id', $case->id)->delete();
+-        if ($request->petitioner_advocate && count($request->petitioner_advocate) > 0) {
+-            foreach ($request->petitioner_advocate as $p) {
+-                if ($p != null) {
+-                    PetitionerAdvocate::create(['case_id' => $case->id, 'petitioner_advocate' => $p]);
+-                } else {
+-                    if ($key == 0) {
+-                        PetitionerAdvocate::create(['case_id' => $case->id, 'petitioner_advocate' => '---']);
+-                    }
++                    // Handle case where no petitioner_name is provided
++                    // You can choose to log a message or store a default value here if needed
+                 }
+             }
+         }
+
+-        Respondent::where('case_id', $case->id)->delete();
+         if ($request->respondent && count($request->respondent) > 0) {
+             foreach ($request->respondent as $r) {
+-                if ($r != null) {
+-                    Respondent::create(['case_id' => $case->id, 'respondent' => $r]);
++                if (!empty($r['respondent_name'])) {
++                    try {
++                        // Store the respondent name
++                        $respondent = Respondent::create([
++                            'case_id' => $model->id,
++                            'respondent' => $r['respondent_name']
++                        ]);
++
++                        // Check if there's a corresponding advocate to store
++                        if (!empty($r['respondent_advocate'])) {
++                            RespondentAdvocate::create([
++                                'case_id' => $model->id,
++                                'respondent_advocate' => $r['respondent_advocate'],
++                            ]);
++                        }
++                    } catch (\Exception $e) {
++                        // Log the error message
++                        \Log::error('Failed to insert respondent: ' . $e->getMessage());
++                        // Optionally, you can return a response or set an error flag
++                    }
+                 } else {
+-                    if ($key == 0) {
+-                        Respondent::create(['case_id' => $case->id, 'respondent' => '---']);
+-                    }
+-                }
+-            }
+-        }
+-
+-        RespondentAdvocate::where('case_id', $case->id)->delete();
+-        if ($request->respondent_advocate && count($request->respondent_advocate) > 0) {
+-            foreach ($request->respondent_advocate as $r) {
+-                if ($r != null) {
+-                    RespondentAdvocate::create(['case_id' => $case->id, 'respondent_advocate' => $r]);
+-                } else {
+-                    if ($key == 0) {
+-                        RespondentAdvocate::create(['case_id' => $case->id, 'respondent_advocate' => '---']);
+-                    }
++                    // Handle case where no respondent_name is provided
++                    // You can choose to log a message or store a default value here if needed
+                 }
+             }
+         }
