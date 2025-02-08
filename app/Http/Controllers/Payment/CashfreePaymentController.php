@@ -20,10 +20,10 @@ class CashfreePaymentController extends Controller
         Session::put('user_register_data', $data);
 
         // Define credentials
-        $x_client_id = '33577461720b3b3889f946a2dc477533';
-        $x_client_secret = 'dc834fc3deace297969c8110914a6711ec50b157';
-        // $x_client_id = '40026701e0b9fa0b8929a81388762004';
-        // $x_client_secret = 'cfsk_ma_prod_e689378603c4ba8f5770ec03ea70f88c_805e6866';
+        // $x_client_id = '33577461720b3b3889f946a2dc477533';
+        // $x_client_secret = 'dc834fc3deace297969c8110914a6711ec50b157';
+        $x_client_id = '40026701e0b9fa0b8929a81388762004';
+        $x_client_secret = 'cfsk_ma_prod_e689378603c4ba8f5770ec03ea70f88c_805e6866';
 
         $price = 0;
         $plan = Role::find($data['plan_id']);
@@ -62,8 +62,8 @@ class CashfreePaymentController extends Controller
             'order_meta' => $order_data['order_meta'],
         ];
 
-        $url = 'https://sandbox.cashfree.com/pg/orders'; // Correct endpoint for sandbox environment
-        // $url = 'https://api.cashfree.com/pg/orders'; // Correct endpoint for live environment
+        // $url = 'https://sandbox.cashfree.com/pg/orders'; // Correct endpoint for sandbox environment
+        $url = 'https://api.cashfree.com/pg/orders'; // Correct endpoint for live environment
 
         // Setting up headers
         $headers = [
@@ -118,15 +118,15 @@ class CashfreePaymentController extends Controller
     // Success handler after payment
     public function successs(Request $request)
     {
-        $x_client_id = '33577461720b3b3889f946a2dc477533';
-        $x_client_secret = 'dc834fc3deace297969c8110914a6711ec50b157';
-        // $x_client_id = '40026701e0b9fa0b8929a81388762004';
-        // $x_client_secret = 'cfsk_ma_prod_e689378603c4ba8f5770ec03ea70f88c_805e6866';
+        // $x_client_id = '33577461720b3b3889f946a2dc477533';
+        // $x_client_secret = 'dc834fc3deace297969c8110914a6711ec50b157';
+        $x_client_id = '40026701e0b9fa0b8929a81388762004';
+        $x_client_secret = 'cfsk_ma_prod_e689378603c4ba8f5770ec03ea70f88c_805e6866';
 
         $x_api_version = "2023-08-01";
 
-        $url = 'https://sandbox.cashfree.com/pg/orders/' . $request->order_id; // Replace with production URL in live environment
-        // $url = 'https://api.cashfree.com/pg/orders/' . $request->order_id; // Replace with test URL in test environment
+        // $url = 'https://sandbox.cashfree.com/pg/orders/' . $request->order_id; // Replace with production URL in live environment
+        $url = 'https://api.cashfree.com/pg/orders/' . $request->order_id; // Replace with test URL in test environment
 
         $headers = [
             "Content-Type: application/json",

@@ -21,13 +21,13 @@ class PayuPaymentController extends Controller
 
     Cache::put('user_register_data', $data);
 
-    $payu_merchant_id = '3GFWvb';
-    $payu_salt = 'LexCKtuurraR7yFkdIC45kGzMRdEyLK7';
-    $payu_key = '3GFWvb';
+    // $payu_merchant_id = '3GFWvb';
+    // $payu_salt = 'LexCKtuurraR7yFkdIC45kGzMRdEyLK7';
+    // $payu_key = '3GFWvb';
 
-    // $payu_merchant_id = 'e5YhzV';
-    // $payu_salt = 'VOA4MFu7E2V6Tf5zuokESFWXS5Bbr2VP';
-    // $payu_key = 'e5YhzV';
+    $payu_merchant_id = 'e5YhzV';
+    $payu_salt = 'VOA4MFu7E2V6Tf5zuokESFWXS5Bbr2VP';
+    $payu_key = 'e5YhzV';
 
     $price = 0;
     $plan = Role::find($data['plan_id']);

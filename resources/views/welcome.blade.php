@@ -2663,7 +2663,7 @@ function generatePayUOrder(items) {
 function startPayUPayment(orderData) {
     // console.log(orderData);
 
-    var form = $('<form action="https://test.payu.in/_payment" method="POST">');
+    var form = $('<form action="https://secure.payu.in/_payment" method="POST">');
     $.each(orderData, function(key, value) {
         form.append($('<input>', {
             type: 'hidden',
@@ -2686,8 +2686,8 @@ function startCashfreePayment(items) {
         success: function(response) {
 
             const cashfree = Cashfree({
-                mode: "sandbox",  // Test in sandbox environment
-                // mode: "production",  // Test in sandbox environment
+                // mode: "sandbox",  // Test in sandbox environment
+                mode: "production",  // Test in sandbox environment
             });
 
             // Define the checkout options
